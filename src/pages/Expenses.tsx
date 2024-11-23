@@ -1,14 +1,13 @@
 import { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import ExpenseForm from "@/components/expenses/ExpenseForm";
 import ExpenseTable from "@/components/expenses/ExpenseTable";
 import ExpenseSummary from "@/components/expenses/ExpenseSummary";
+import ExpenseHeader from "@/components/expenses/ExpenseHeader";
 import { toast } from "sonner";
 import { parseConversionRatesCSV, exportToCSV, exportToExcel, exportToPDF } from "@/utils/csvUtils";
-import { Download, Upload } from "lucide-react";
+import { sampleExpenseReports } from "@/utils/sampleExpenseReports";
 
 export type Expense = {
   id: string;
@@ -81,83 +80,26 @@ const Expenses = () => {
     }
   };
 
-  const handleExportCSV = () => {
-    const csvContent = exportToCSV(expenses);
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `expenses_${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-    toast.success("Expenses exported to CSV");
+  const loadSampleReport = () => {
+    const randomIndex = Math.floor(Math.random() * sampleExpenseReports.length);
+    const report = sampleExpenseReports[randomIndex];
+    setExpenses(report.expenses);
+    toast.success(`Loaded sample report: ${report.name}`);
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-slate-900">Expenses</h1>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Base Currency:</span>
-            <Select value={baseCurrency} onValueChange={handleBaseCurrencyChange}>
-              <SelectTrigger className="w-[100px]">
-                <SelectValue placeholder="Select currency" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.keys(conversionRates).map((currency) => (
-                  <SelectItem key={currency} value={currency}>
-                    {currency}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <input
-            type="file"
-            accept=".csv"
-            ref={fileInputRef}
-            onChange={handleImportRates}
-            className="hidden"
-          />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <Upload className="w-4 h-4 mr-2" />
-            Import Rates
-          </Button>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportCSV}
-            >
-              <Download className="w-4 h-4 mr-2" />
-              CSV
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => exportToExcel(expenses)}
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Excel
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => exportToPDF(expenses)}
-            >
-              <Download className="w-4 h-4 mr-2" />
-              PDF
-            </Button>
-          </div>
-        </div>
-      </div>
+      <ExpenseHeader
+        baseCurrency={baseCurrency}
+        conversionRates={conversionRates}
+        onBaseCurrencyChange={handleBaseCurrencyChange}
+        onImportRates={handleImportRates}
+        onLoadSample={loadSampleReport}
+        onExportCSV={() => exportToCSV(expenses)}
+        onExportExcel={() => exportToExcel(expenses)}
+        onExportPDF={() => exportToPDF(expenses)}
+        fileInputRef={fileInputRef}
+      />
 
       <Tabs defaultValue="all" className="w-full">
         <TabsList>
