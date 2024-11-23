@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ExpenseForm from "@/components/expenses/ExpenseForm";
 import ExpenseTable from "@/components/expenses/ExpenseTable";
 import ExpenseSummary from "@/components/expenses/ExpenseSummary";
@@ -25,6 +26,7 @@ export type Expense = {
 
 const Expenses = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [baseCurrency, setBaseCurrency] = useState("USD");
   
   // Mock conversion rates - in a real app, these would come from an API
   const conversionRates: Record<string, number> = {
@@ -53,10 +55,30 @@ const Expenses = () => {
     toast.success("Expense added successfully");
   };
 
+  const handleBaseCurrencyChange = (newCurrency: string) => {
+    setBaseCurrency(newCurrency);
+    toast.success(`Base currency changed to ${newCurrency}`);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-slate-900">Expenses</h1>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Base Currency:</span>
+          <Select value={baseCurrency} onValueChange={handleBaseCurrencyChange}>
+            <SelectTrigger className="w-[100px]">
+              <SelectValue placeholder="Select currency" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.keys(conversionRates).map((currency) => (
+                <SelectItem key={currency} value={currency}>
+                  {currency}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <Tabs defaultValue="all" className="w-full">
@@ -71,7 +93,7 @@ const Expenses = () => {
           <Card className="p-6">
             <ExpenseForm 
               onSubmit={handleAddExpense} 
-              baseCurrency="USD"
+              baseCurrency={baseCurrency}
               conversionRates={conversionRates}
             />
           </Card>
@@ -84,7 +106,7 @@ const Expenses = () => {
             <ExpenseForm 
               onSubmit={handleAddExpense} 
               defaultType="work"
-              baseCurrency="USD"
+              baseCurrency={baseCurrency}
               conversionRates={conversionRates}
             />
           </Card>
@@ -100,7 +122,7 @@ const Expenses = () => {
             <ExpenseForm 
               onSubmit={handleAddExpense} 
               defaultType="private"
-              baseCurrency="USD"
+              baseCurrency={baseCurrency}
               conversionRates={conversionRates}
             />
           </Card>
