@@ -6,169 +6,224 @@ const generateSampleDate = (daysAgo: number) => {
   return date;
 };
 
+// Define category colors for consistency across the app
+export const categoryColors: Record<string, string> = {
+  Travel: "#3B82F6",
+  Food: "#10B981",
+  Supplies: "#F59E0B",
+  Equipment: "#6366F1",
+  Software: "#EC4899",
+  Subscription: "#8B5CF6",
+  Entertainment: "#F97316",
+  Transportation: "#14B8A6",
+  Accommodation: "#6366F1",
+  "Office Supplies": "#EF4444",
+  Other: "#6B7280"
+};
+
+const createSampleExpense = (
+  id: string,
+  daysAgo: number,
+  type: "work" | "private",
+  category: string,
+  description: string,
+  amount: number,
+  currency: string,
+  conversionRate: number,
+  paymentMethod: string,
+  reimbursable: boolean
+): Expense => ({
+  id,
+  date: generateSampleDate(daysAgo),
+  type,
+  category,
+  description: `[SAMPLE] ${description}`,  // Make samples clearly identifiable
+  amount,
+  currency,
+  convertedAmount: amount * conversionRate,
+  conversionRate,
+  paymentMethod,
+  reimbursable,
+  isLocked: false,
+  createdAt: generateSampleDate(daysAgo),
+  updatedAt: generateSampleDate(daysAgo),
+});
+
 export const sampleExpenseReports = [
   {
-    name: "Business Trip Report",
+    name: "International Business Trip",
     expenses: [
-      {
-        id: "sample-1",
-        date: generateSampleDate(5),
-        type: "work" as const,
-        category: "Travel",
-        description: "Flight to Stockholm",
-        amount: 2500,
-        currency: "SEK",
-        convertedAmount: 2500,
-        conversionRate: 1,
-        paymentMethod: "Corporate Card",
-        reimbursable: true,
-        isLocked: false,
-        createdAt: generateSampleDate(5),
-        updatedAt: generateSampleDate(5),
-      },
-      {
-        id: "sample-2",
-        date: generateSampleDate(5),
-        type: "work" as const,
-        category: "Accommodation",
-        description: "Hotel - 2 nights",
-        amount: 3200,
-        currency: "SEK",
-        convertedAmount: 3200,
-        conversionRate: 1,
-        paymentMethod: "Corporate Card",
-        reimbursable: true,
-        isLocked: false,
-        createdAt: generateSampleDate(5),
-        updatedAt: generateSampleDate(5),
-      },
-      {
-        id: "sample-3",
-        date: generateSampleDate(4),
-        type: "work" as const,
-        category: "Meals",
-        description: "Client Dinner",
-        amount: 850,
-        currency: "SEK",
-        convertedAmount: 850,
-        conversionRate: 1,
-        paymentMethod: "Corporate Card",
-        reimbursable: true,
-        isLocked: false,
-        createdAt: generateSampleDate(4),
-        updatedAt: generateSampleDate(4),
-      }
-    ] as Expense[]
+      createSampleExpense(
+        "sample-1",
+        5,
+        "work",
+        "Travel",
+        "Flight to New York (Business Class)",
+        1200,
+        "USD",
+        10.45,
+        "Corporate Card",
+        true
+      ),
+      createSampleExpense(
+        "sample-2",
+        5,
+        "work",
+        "Accommodation",
+        "Hilton Hotel - 3 nights",
+        900,
+        "USD",
+        10.45,
+        "Corporate Card",
+        true
+      ),
+      createSampleExpense(
+        "sample-3",
+        4,
+        "work",
+        "Food",
+        "Client Dinner at Michelin Star Restaurant",
+        400,
+        "USD",
+        10.45,
+        "Corporate Card",
+        true
+      )
+    ]
   },
   {
-    name: "Monthly Office Expenses",
+    name: "Office Setup Expenses",
     expenses: [
-      {
-        id: "sample-4",
-        date: generateSampleDate(15),
-        type: "work" as const,
-        category: "Office Supplies",
-        description: "Printer Paper",
-        amount: 299,
-        currency: "SEK",
-        convertedAmount: 299,
-        conversionRate: 1,
-        paymentMethod: "Cash",
-        reimbursable: true,
-        isLocked: false,
-        createdAt: generateSampleDate(15),
-        updatedAt: generateSampleDate(15),
-      },
-      {
-        id: "sample-5",
-        date: generateSampleDate(15),
-        type: "work" as const,
-        category: "Software",
-        description: "Adobe Creative Cloud",
-        amount: 599,
-        currency: "SEK",
-        convertedAmount: 599,
-        conversionRate: 1,
-        paymentMethod: "Credit Card",
-        reimbursable: true,
-        isLocked: false,
-        createdAt: generateSampleDate(15),
-        updatedAt: generateSampleDate(15),
-      }
-    ] as Expense[]
+      createSampleExpense(
+        "sample-4",
+        15,
+        "work",
+        "Equipment",
+        "Standing Desk and Ergonomic Chair",
+        12000,
+        "SEK",
+        1,
+        "Corporate Card",
+        true
+      ),
+      createSampleExpense(
+        "sample-5",
+        15,
+        "work",
+        "Software",
+        "Annual Adobe Creative Cloud License",
+        5999,
+        "SEK",
+        1,
+        "Bank Transfer",
+        true
+      ),
+      createSampleExpense(
+        "sample-6",
+        15,
+        "work",
+        "Office Supplies",
+        "Premium Stationery Set",
+        1499,
+        "SEK",
+        1,
+        "Corporate Card",
+        true
+      )
+    ]
   },
   {
-    name: "Mixed Expenses Report",
+    name: "Mixed Travel Expenses",
     expenses: [
-      {
-        id: "sample-6",
-        date: generateSampleDate(2),
-        type: "private" as const,
-        category: "Entertainment",
-        description: "Cinema Tickets",
-        amount: 240,
-        currency: "SEK",
-        convertedAmount: 240,
-        conversionRate: 1,
-        paymentMethod: "Debit Card",
-        reimbursable: false,
-        isLocked: false,
-        createdAt: generateSampleDate(2),
-        updatedAt: generateSampleDate(2),
-      },
-      {
-        id: "sample-7",
-        date: generateSampleDate(1),
-        type: "work" as const,
-        category: "Transportation",
-        description: "Taxi to Meeting",
-        amount: 450,
-        currency: "SEK",
-        convertedAmount: 450,
-        conversionRate: 1,
-        paymentMethod: "Cash",
-        reimbursable: true,
-        isLocked: false,
-        createdAt: generateSampleDate(1),
-        updatedAt: generateSampleDate(1),
-      }
-    ] as Expense[]
+      createSampleExpense(
+        "sample-7",
+        2,
+        "private",
+        "Entertainment",
+        "Weekend Theater Show",
+        850,
+        "SEK",
+        1,
+        "Personal Card",
+        false
+      ),
+      createSampleExpense(
+        "sample-8",
+        2,
+        "work",
+        "Transportation",
+        "Airport Express Train",
+        299,
+        "SEK",
+        1,
+        "Cash",
+        true
+      ),
+      createSampleExpense(
+        "sample-9",
+        1,
+        "work",
+        "Food",
+        "Team Lunch Meeting",
+        1200,
+        "SEK",
+        1,
+        "Corporate Card",
+        true
+      )
+    ]
   },
   {
-    name: "International Trip Report",
+    name: "European Conference Trip",
     expenses: [
-      {
-        id: "sample-8",
-        date: generateSampleDate(10),
-        type: "work" as const,
-        category: "Travel",
-        description: "Flight to London",
-        amount: 250,
-        currency: "GBP",
-        convertedAmount: 3312.50,
-        conversionRate: 13.25,
-        paymentMethod: "Corporate Card",
-        reimbursable: true,
-        isLocked: false,
-        createdAt: generateSampleDate(10),
-        updatedAt: generateSampleDate(10),
-      },
-      {
-        id: "sample-9",
-        date: generateSampleDate(9),
-        type: "work" as const,
-        category: "Meals",
-        description: "Restaurant - London",
-        amount: 45,
-        currency: "GBP",
-        convertedAmount: 596.25,
-        conversionRate: 13.25,
-        paymentMethod: "Corporate Card",
-        reimbursable: true,
-        isLocked: false,
-        createdAt: generateSampleDate(9),
-        updatedAt: generateSampleDate(9),
-      }
-    ] as Expense[]
+      createSampleExpense(
+        "sample-10",
+        10,
+        "work",
+        "Travel",
+        "Flight to Berlin (Economy Plus)",
+        450,
+        "EUR",
+        11.35,
+        "Corporate Card",
+        true
+      ),
+      createSampleExpense(
+        "sample-11",
+        9,
+        "work",
+        "Accommodation",
+        "Hotel Europa - Conference Rate",
+        600,
+        "EUR",
+        11.35,
+        "Corporate Card",
+        true
+      ),
+      createSampleExpense(
+        "sample-12",
+        8,
+        "private",
+        "Entertainment",
+        "Berlin Museum Pass",
+        35,
+        "EUR",
+        11.35,
+        "Personal Card",
+        false
+      ),
+      createSampleExpense(
+        "sample-13",
+        8,
+        "work",
+        "Transportation",
+        "Taxi to Conference Center",
+        45,
+        "EUR",
+        11.35,
+        "Cash",
+        true
+      )
+    ]
   }
 ];

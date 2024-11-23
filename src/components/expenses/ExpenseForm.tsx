@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import type { Expense } from "@/pages/Expenses";
+import ReceiptUploader from "./ReceiptUploader";
 
 const categories = [
   "Travel",
@@ -111,6 +112,11 @@ const ExpenseForm = ({ onSubmit, defaultType, baseCurrency, conversionRates, edi
       setReimbursable(false);
       setManualRate("");
     }
+  };
+
+  const handleReceiptUpload = (file: File) => {
+    // Store the receipt file (this would typically upload to a server or store locally)
+    console.log('Receipt file:', file);
   };
 
   return (
@@ -262,6 +268,11 @@ const ExpenseForm = ({ onSubmit, defaultType, baseCurrency, conversionRates, edi
           placeholder="Enter expense description"
           required
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Receipt</Label>
+        <ReceiptUploader onUpload={handleReceiptUpload} />
       </div>
 
       <Button type="submit" className="w-full">
