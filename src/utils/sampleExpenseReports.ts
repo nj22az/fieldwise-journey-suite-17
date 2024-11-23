@@ -13,7 +13,7 @@ export const sampleExpenseReports = [
       {
         id: "sample-1",
         date: generateSampleDate(5),
-        type: "work",
+        type: "work" as const,
         category: "Travel",
         description: "Flight to Stockholm",
         amount: 2500,
@@ -29,7 +29,7 @@ export const sampleExpenseReports = [
       {
         id: "sample-2",
         date: generateSampleDate(5),
-        type: "work",
+        type: "work" as const,
         category: "Accommodation",
         description: "Hotel - 2 nights",
         amount: 3200,
@@ -45,7 +45,7 @@ export const sampleExpenseReports = [
       {
         id: "sample-3",
         date: generateSampleDate(4),
-        type: "work",
+        type: "work" as const,
         category: "Meals",
         description: "Client Dinner",
         amount: 850,
@@ -58,7 +58,7 @@ export const sampleExpenseReports = [
         createdAt: generateSampleDate(4),
         updatedAt: generateSampleDate(4),
       }
-    ]
+    ] as Expense[]
   },
   {
     name: "Monthly Office Expenses",
@@ -66,7 +66,7 @@ export const sampleExpenseReports = [
       {
         id: "sample-4",
         date: generateSampleDate(15),
-        type: "work",
+        type: "work" as const,
         category: "Office Supplies",
         description: "Printer Paper",
         amount: 299,
@@ -82,7 +82,7 @@ export const sampleExpenseReports = [
       {
         id: "sample-5",
         date: generateSampleDate(15),
-        type: "work",
+        type: "work" as const,
         category: "Software",
         description: "Adobe Creative Cloud",
         amount: 599,
@@ -95,7 +95,7 @@ export const sampleExpenseReports = [
         createdAt: generateSampleDate(15),
         updatedAt: generateSampleDate(15),
       }
-    ]
+    ] as Expense[]
   },
   {
     name: "Mixed Expenses Report",
@@ -103,7 +103,7 @@ export const sampleExpenseReports = [
       {
         id: "sample-6",
         date: generateSampleDate(2),
-        type: "private",
+        type: "private" as const,
         category: "Entertainment",
         description: "Cinema Tickets",
         amount: 240,
@@ -119,7 +119,7 @@ export const sampleExpenseReports = [
       {
         id: "sample-7",
         date: generateSampleDate(1),
-        type: "work",
+        type: "work" as const,
         category: "Transportation",
         description: "Taxi to Meeting",
         amount: 450,
@@ -132,7 +132,7 @@ export const sampleExpenseReports = [
         createdAt: generateSampleDate(1),
         updatedAt: generateSampleDate(1),
       }
-    ]
+    ] as Expense[]
   },
   {
     name: "International Trip Report",
@@ -140,7 +140,7 @@ export const sampleExpenseReports = [
       {
         id: "sample-8",
         date: generateSampleDate(10),
-        type: "work",
+        type: "work" as const,
         category: "Travel",
         description: "Flight to London",
         amount: 250,
@@ -156,7 +156,7 @@ export const sampleExpenseReports = [
       {
         id: "sample-9",
         date: generateSampleDate(9),
-        type: "work",
+        type: "work" as const,
         category: "Meals",
         description: "Restaurant - London",
         amount: 45,
@@ -169,6 +169,6 @@ export const sampleExpenseReports = [
         createdAt: generateSampleDate(9),
         updatedAt: generateSampleDate(9),
       }
-    ]
+    ] as Expense[]
   }
 ];
