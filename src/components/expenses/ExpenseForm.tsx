@@ -16,6 +16,7 @@ const categories = [
   "Supplies",
   "Equipment",
   "Software",
+  "Subscription",
   "Other"
 ];
 
@@ -26,19 +27,43 @@ const paymentMethods = [
   "Other"
 ];
 
+const currencies = [
+  "USD",
+  "EUR",
+  "GBP",
+  "JPY",
+  "AUD",
+  "CAD",
+  "CHF",
+  "CNY",
+  "SEK",
+  "NZD"
+];
+
 interface ExpenseFormProps {
   onSubmit: (expense: Omit<Expense, "id" | "createdAt" | "updatedAt" | "isLocked">) => void;
   defaultType?: "work" | "private";
+  baseCurrency: string;
+  conversionRates: Record<string, number>;
 }
 
-const ExpenseForm = ({ onSubmit, defaultType }: ExpenseFormProps) => {
+const ExpenseForm = ({ onSubmit, defaultType, baseCurrency, conversionRates }: ExpenseFormProps) => {
   const [date, setDate] = useState<Date>(new Date());
   const [type, setType] = useState<"work" | "private">(defaultType || "work");
   const [category, setCategory] = useState<string>(categories[0]);
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
+  const [currency, setCurrency] = useState(baseCurrency);
   const [paymentMethod, setPaymentMethod] = useState<string>(paymentMethods[0]);
   const [reimbursable, setReimbursable] = useState(false);
+  const [manualRate, setManualRate] = useState<string>("");
+
+  const getConvertedAmount = () => {
+    if (!amount) return "0.00";
+    const rate = manualRate ? parseFloat(manualRate) : conversionRates[currency] || 1;
+    const converted = parseFloat(amount) * rate;
+    return converted.toFixed(2);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +74,9 @@ const ExpenseForm = ({ onSubmit, defaultType }: ExpenseFormProps) => {
       category,
       description,
       amount: parseFloat(amount),
+      currency,
+      convertedAmount: parseFloat(getConvertedAmount()),
+      conversionRate: manualRate ? parseFloat(manualRate) : conversionRates[currency] || 1,
       paymentMethod,
       reimbursable,
     });
@@ -59,8 +87,10 @@ const ExpenseForm = ({ onSubmit, defaultType }: ExpenseFormProps) => {
     setCategory(categories[0]);
     setDescription("");
     setAmount("");
+    setCurrency(baseCurrency);
     setPaymentMethod(paymentMethods[0]);
     setReimbursable(false);
+    setManualRate("");
   };
 
   return (
@@ -118,18 +148,56 @@ const ExpenseForm = ({ onSubmit, defaultType }: ExpenseFormProps) => {
           </Select>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="amount">Amount</Label>
-          <Input
-            id="amount"
-            type="number"
-            step="0.01"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="0.00"
-            required
-          />
+        <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-2">
+            <Label htmlFor="amount">Amount</Label>
+            <Input
+              id="amount"
+              type="number"
+              step="0.01"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0.00"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="currency">Currency</Label>
+            <Select value={currency} onValueChange={setCurrency}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select currency" />
+              </SelectTrigger>
+              <SelectContent>
+                {currencies.map((curr) => (
+                  <SelectItem key={curr} value={curr}>
+                    {curr}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
+
+        {currency !== baseCurrency && (
+          <div className="space-y-2 col-span-2">
+            <Label>
+              Converted Amount ({baseCurrency}): {getConvertedAmount()}
+            </Label>
+            <div className="flex gap-2 items-center">
+              <Input
+                type="number"
+                step="0.0001"
+                value={manualRate}
+                onChange={(e) => setManualRate(e.target.value)}
+                placeholder={`Custom rate (Current: ${conversionRates[currency]})`}
+              />
+              <span className="text-sm text-muted-foreground">
+                1 {currency} = {manualRate || conversionRates[currency] || 1} {baseCurrency}
+              </span>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-2">
           <Label htmlFor="paymentMethod">Payment Method</Label>
