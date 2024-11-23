@@ -29,6 +29,7 @@ export type Expense = {
 const Expenses = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [baseCurrency, setBaseCurrency] = useState("SEK");
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [conversionRates, setConversionRates] = useState<Record<string, number>>({
     USD: 10.45,
     EUR: 11.35,
@@ -44,17 +45,42 @@ const Expenses = () => {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleAddExpense = (expense: Omit<Expense, "id" | "createdAt" | "updatedAt" | "isLocked">) => {
-    const newExpense: Expense = {
-      ...expense,
-      id: crypto.randomUUID(),
-      isLocked: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    
-    setExpenses((prev) => [newExpense, ...prev]);
-    toast.success("Expense added successfully");
+  const handleAddExpense = (expenseData: Omit<Expense, "id" | "createdAt" | "updatedAt" | "isLocked">) => {
+    if (editingExpense) {
+      // Update existing expense
+      setExpenses(prev => prev.map(exp => 
+        exp.id === editingExpense.id 
+          ? {
+              ...exp,
+              ...expenseData,
+              updatedAt: new Date()
+            }
+          : exp
+      ));
+      setEditingExpense(null);
+      toast.success("Expense updated successfully");
+    } else {
+      // Add new expense
+      const newExpense: Expense = {
+        ...expenseData,
+        id: crypto.randomUUID(),
+        isLocked: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      setExpenses((prev) => [newExpense, ...prev]);
+      toast.success("Expense added successfully");
+    }
+  };
+
+  const handleEditExpense = (expense: Expense) => {
+    if (expense.isLocked) {
+      toast.error("Cannot edit a locked expense");
+      return;
+    }
+    setEditingExpense(expense);
+    // Scroll to form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBaseCurrencyChange = (newCurrency: string) => {
@@ -115,9 +141,14 @@ const Expenses = () => {
               onSubmit={handleAddExpense} 
               baseCurrency={baseCurrency}
               conversionRates={conversionRates}
+              editingExpense={editingExpense}
             />
           </Card>
-          <ExpenseTable expenses={expenses} setExpenses={setExpenses} />
+          <ExpenseTable 
+            expenses={expenses} 
+            setExpenses={setExpenses} 
+            onEdit={handleEditExpense}
+          />
         </TabsContent>
         
         <TabsContent value="work" className="space-y-6">
@@ -128,11 +159,13 @@ const Expenses = () => {
               defaultType="work"
               baseCurrency={baseCurrency}
               conversionRates={conversionRates}
+              editingExpense={editingExpense}
             />
           </Card>
           <ExpenseTable 
             expenses={expenses.filter(e => e.type === "work")} 
-            setExpenses={setExpenses} 
+            setExpenses={setExpenses}
+            onEdit={handleEditExpense}
           />
         </TabsContent>
         
@@ -144,11 +177,13 @@ const Expenses = () => {
               defaultType="private"
               baseCurrency={baseCurrency}
               conversionRates={conversionRates}
+              editingExpense={editingExpense}
             />
           </Card>
           <ExpenseTable 
             expenses={expenses.filter(e => e.type === "private")} 
-            setExpenses={setExpenses} 
+            setExpenses={setExpenses}
+            onEdit={handleEditExpense}
           />
         </TabsContent>
       </Tabs>

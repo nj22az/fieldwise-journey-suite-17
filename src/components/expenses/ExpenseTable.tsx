@@ -1,6 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Lock, Unlock, Copy, Trash2, History } from "lucide-react";
+import { Lock, Unlock, Copy, Trash2, History, Edit2 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import type { Expense } from "@/pages/Expenses";
@@ -8,9 +8,10 @@ import type { Expense } from "@/pages/Expenses";
 interface ExpenseTableProps {
   expenses: Expense[];
   setExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
+  onEdit: (expense: Expense) => void;
 }
 
-const ExpenseTable = ({ expenses, setExpenses }: ExpenseTableProps) => {
+const ExpenseTable = ({ expenses, setExpenses, onEdit }: ExpenseTableProps) => {
   const handleLockToggle = (id: string) => {
     setExpenses((prev) =>
       prev.map((expense) =>
@@ -35,13 +36,17 @@ const ExpenseTable = ({ expenses, setExpenses }: ExpenseTableProps) => {
   };
 
   const handleDelete = (id: string) => {
+    const expense = expenses.find(e => e.id === id);
+    if (expense?.isLocked) {
+      toast.error("Cannot delete a locked expense");
+      return;
+    }
     setExpenses((prev) => prev.filter((expense) => expense.id !== id));
     toast.success("Expense deleted successfully");
   };
 
   const handleViewHistory = (expense: Expense) => {
-    toast.info(`History for expense from ${format(expense.date, "PP")}`);
-    // TODO: Implement history view
+    toast.info(`Last modified: ${format(expense.updatedAt, "PPpp")}`);
   };
 
   return (
@@ -90,6 +95,14 @@ const ExpenseTable = ({ expenses, setExpenses }: ExpenseTableProps) => {
                     onClick={() => handleCopy(expense)}
                   >
                     <Copy className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onEdit(expense)}
+                    disabled={expense.isLocked}
+                  >
+                    <Edit2 className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="ghost"

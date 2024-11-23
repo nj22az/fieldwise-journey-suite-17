@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,9 +45,10 @@ interface ExpenseFormProps {
   defaultType?: "work" | "private";
   baseCurrency: string;
   conversionRates: Record<string, number>;
+  editingExpense?: Expense | null;
 }
 
-const ExpenseForm = ({ onSubmit, defaultType, baseCurrency, conversionRates }: ExpenseFormProps) => {
+const ExpenseForm = ({ onSubmit, defaultType, baseCurrency, conversionRates, editingExpense }: ExpenseFormProps) => {
   const [date, setDate] = useState<Date>(new Date());
   const [type, setType] = useState<"work" | "private">(defaultType || "work");
   const [category, setCategory] = useState<string>(categories[0]);
@@ -57,6 +58,23 @@ const ExpenseForm = ({ onSubmit, defaultType, baseCurrency, conversionRates }: E
   const [paymentMethod, setPaymentMethod] = useState<string>(paymentMethods[0]);
   const [reimbursable, setReimbursable] = useState(false);
   const [manualRate, setManualRate] = useState<string>("");
+
+  // Load editing expense data
+  useEffect(() => {
+    if (editingExpense) {
+      setDate(editingExpense.date);
+      setType(editingExpense.type);
+      setCategory(editingExpense.category);
+      setDescription(editingExpense.description);
+      setAmount(editingExpense.amount.toString());
+      setCurrency(editingExpense.currency);
+      setPaymentMethod(editingExpense.paymentMethod);
+      setReimbursable(editingExpense.reimbursable);
+      if (editingExpense.conversionRate !== conversionRates[editingExpense.currency]) {
+        setManualRate(editingExpense.conversionRate.toString());
+      }
+    }
+  }, [editingExpense]);
 
   const getConvertedAmount = () => {
     if (!amount) return "0.00";
@@ -81,16 +99,18 @@ const ExpenseForm = ({ onSubmit, defaultType, baseCurrency, conversionRates }: E
       reimbursable,
     });
 
-    // Reset form
-    setDate(new Date());
-    setType(defaultType || "work");
-    setCategory(categories[0]);
-    setDescription("");
-    setAmount("");
-    setCurrency(baseCurrency);
-    setPaymentMethod(paymentMethods[0]);
-    setReimbursable(false);
-    setManualRate("");
+    // Reset form if not editing
+    if (!editingExpense) {
+      setDate(new Date());
+      setType(defaultType || "work");
+      setCategory(categories[0]);
+      setDescription("");
+      setAmount("");
+      setCurrency(baseCurrency);
+      setPaymentMethod(paymentMethods[0]);
+      setReimbursable(false);
+      setManualRate("");
+    }
   };
 
   return (
@@ -230,6 +250,7 @@ const ExpenseForm = ({ onSubmit, defaultType, baseCurrency, conversionRates }: E
             </SelectContent>
           </Select>
         </div>
+
       </div>
 
       <div className="space-y-2">
@@ -244,7 +265,7 @@ const ExpenseForm = ({ onSubmit, defaultType, baseCurrency, conversionRates }: E
       </div>
 
       <Button type="submit" className="w-full">
-        Add Expense
+        {editingExpense ? "Update Expense" : "Add Expense"}
       </Button>
     </form>
   );
