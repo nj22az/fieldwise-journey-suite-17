@@ -4,19 +4,20 @@ import type { Expense } from "@/pages/Expenses";
 
 interface ExpenseSummaryProps {
   expenses: Expense[];
+  baseCurrency: string;
 }
 
-const ExpenseSummary = ({ expenses }: ExpenseSummaryProps) => {
-  const totalAmount = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+const ExpenseSummary = ({ expenses, baseCurrency }: ExpenseSummaryProps) => {
+  const totalAmount = expenses.reduce((sum, expense) => sum + expense.convertedAmount, 0);
   const workExpenses = expenses.filter(e => e.type === "work");
   const privateExpenses = expenses.filter(e => e.type === "private");
   const reimbursableAmount = expenses
     .filter(e => e.reimbursable)
-    .reduce((sum, expense) => sum + expense.amount, 0);
+    .reduce((sum, expense) => sum + expense.convertedAmount, 0);
 
   const categoryData = Object.entries(
     expenses.reduce((acc, expense) => {
-      acc[expense.category] = (acc[expense.category] || 0) + expense.amount;
+      acc[expense.category] = (acc[expense.category] || 0) + expense.convertedAmount;
       return acc;
     }, {} as Record<string, number>)
   ).map(([category, amount]) => ({
@@ -31,10 +32,10 @@ const ExpenseSummary = ({ expenses }: ExpenseSummaryProps) => {
           <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">${totalAmount.toFixed(2)}</div>
+          <div className="text-2xl font-bold">{totalAmount.toFixed(2)} {baseCurrency}</div>
           <p className="text-xs text-muted-foreground">
-            Work: ${workExpenses.reduce((sum, e) => sum + e.amount, 0).toFixed(2)} |
-            Private: ${privateExpenses.reduce((sum, e) => sum + e.amount, 0).toFixed(2)}
+            Work: {workExpenses.reduce((sum, e) => sum + e.convertedAmount, 0).toFixed(2)} {baseCurrency} |
+            Private: {privateExpenses.reduce((sum, e) => sum + e.convertedAmount, 0).toFixed(2)} {baseCurrency}
           </p>
         </CardContent>
       </Card>
@@ -44,7 +45,7 @@ const ExpenseSummary = ({ expenses }: ExpenseSummaryProps) => {
           <CardTitle className="text-sm font-medium">Reimbursable Amount</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">${reimbursableAmount.toFixed(2)}</div>
+          <div className="text-2xl font-bold">{reimbursableAmount.toFixed(2)} {baseCurrency}</div>
           <p className="text-xs text-muted-foreground">
             {expenses.filter(e => e.reimbursable).length} reimbursable expenses
           </p>

@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import ExpenseForm from "@/components/expenses/ExpenseForm";
 import ExpenseTable from "@/components/expenses/ExpenseTable";
 import ExpenseSummary from "@/components/expenses/ExpenseSummary";
 import { toast } from "sonner";
+import { parseConversionRatesCSV, exportToCSV } from "@/utils/csvUtils";
+import { Download, Upload } from "lucide-react";
 
 export type Expense = {
   id: string;
@@ -27,9 +30,7 @@ export type Expense = {
 const Expenses = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [baseCurrency, setBaseCurrency] = useState("USD");
-  
-  // Mock conversion rates - in a real app, these would come from an API
-  const conversionRates: Record<string, number> = {
+  const [conversionRates, setConversionRates] = useState<Record<string, number>>({
     USD: 1,
     EUR: 0.85,
     GBP: 0.73,
@@ -40,7 +41,9 @@ const Expenses = () => {
     CNY: 6.45,
     SEK: 8.65,
     NZD: 1.42
-  };
+  });
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddExpense = (expense: Omit<Expense, "id" | "createdAt" | "updatedAt" | "isLocked">) => {
     const newExpense: Expense = {
@@ -60,24 +63,81 @@ const Expenses = () => {
     toast.success(`Base currency changed to ${newCurrency}`);
   };
 
+  const handleImportRates = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const content = e.target?.result as string;
+          const newRates = parseConversionRatesCSV(content);
+          setConversionRates(prev => ({ ...prev, ...newRates }));
+          toast.success("Conversion rates imported successfully");
+        } catch (error) {
+          toast.error("Failed to import conversion rates");
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const handleExportCSV = () => {
+    const csvContent = exportToCSV(expenses);
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `expenses_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    toast.success("Expenses exported to CSV");
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-slate-900">Expenses</h1>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Base Currency:</span>
-          <Select value={baseCurrency} onValueChange={handleBaseCurrencyChange}>
-            <SelectTrigger className="w-[100px]">
-              <SelectValue placeholder="Select currency" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.keys(conversionRates).map((currency) => (
-                <SelectItem key={currency} value={currency}>
-                  {currency}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Base Currency:</span>
+            <Select value={baseCurrency} onValueChange={handleBaseCurrencyChange}>
+              <SelectTrigger className="w-[100px]">
+                <SelectValue placeholder="Select currency" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.keys(conversionRates).map((currency) => (
+                  <SelectItem key={currency} value={currency}>
+                    {currency}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <input
+            type="file"
+            accept=".csv"
+            ref={fileInputRef}
+            onChange={handleImportRates}
+            className="hidden"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Import Rates
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportCSV}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Export CSV
+          </Button>
         </div>
       </div>
 
@@ -89,7 +149,7 @@ const Expenses = () => {
         </TabsList>
         
         <TabsContent value="all" className="space-y-6">
-          <ExpenseSummary expenses={expenses} />
+          <ExpenseSummary expenses={expenses} baseCurrency={baseCurrency} />
           <Card className="p-6">
             <ExpenseForm 
               onSubmit={handleAddExpense} 
@@ -101,7 +161,7 @@ const Expenses = () => {
         </TabsContent>
         
         <TabsContent value="work" className="space-y-6">
-          <ExpenseSummary expenses={expenses.filter(e => e.type === "work")} />
+          <ExpenseSummary expenses={expenses.filter(e => e.type === "work")} baseCurrency={baseCurrency} />
           <Card className="p-6">
             <ExpenseForm 
               onSubmit={handleAddExpense} 
@@ -117,7 +177,7 @@ const Expenses = () => {
         </TabsContent>
         
         <TabsContent value="private" className="space-y-6">
-          <ExpenseSummary expenses={expenses.filter(e => e.type === "private")} />
+          <ExpenseSummary expenses={expenses.filter(e => e.type === "private")} baseCurrency={baseCurrency} />
           <Card className="p-6">
             <ExpenseForm 
               onSubmit={handleAddExpense} 
