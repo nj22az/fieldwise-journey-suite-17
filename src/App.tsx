@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Expenses from "./pages/Expenses";
 import Customers from "./pages/Customers";
+import Mileage from "./pages/Mileage";
 import Layout from "./components/Layout";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/expenses" element={<Expenses />} />
             <Route path="/customers" element={<Customers />} />
+            <Route path="/mileage" element={<Mileage />} />
           </Route>
         </Routes>
       </BrowserRouter>
