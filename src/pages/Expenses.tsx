@@ -7,7 +7,7 @@ import ExpenseForm from "@/components/expenses/ExpenseForm";
 import ExpenseTable from "@/components/expenses/ExpenseTable";
 import ExpenseSummary from "@/components/expenses/ExpenseSummary";
 import { toast } from "sonner";
-import { parseConversionRatesCSV, exportToCSV } from "@/utils/csvUtils";
+import { parseConversionRatesCSV, exportToCSV, exportToExcel, exportToPDF } from "@/utils/csvUtils";
 import { Download, Upload } from "lucide-react";
 
 export type Expense = {
@@ -29,18 +29,18 @@ export type Expense = {
 
 const Expenses = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [baseCurrency, setBaseCurrency] = useState("USD");
+  const [baseCurrency, setBaseCurrency] = useState("SEK");
   const [conversionRates, setConversionRates] = useState<Record<string, number>>({
-    USD: 1,
-    EUR: 0.85,
-    GBP: 0.73,
-    JPY: 110.0,
-    AUD: 1.35,
-    CAD: 1.25,
-    CHF: 0.92,
-    CNY: 6.45,
-    SEK: 8.65,
-    NZD: 1.42
+    USD: 10.45,
+    EUR: 11.35,
+    GBP: 13.23,
+    JPY: 0.071,
+    AUD: 6.85,
+    CAD: 7.75,
+    CHF: 11.92,
+    CNY: 1.45,
+    SEK: 1,
+    NZD: 6.42
   });
   
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -130,14 +130,32 @@ const Expenses = () => {
             <Upload className="w-4 h-4 mr-2" />
             Import Rates
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportCSV}
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Export CSV
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportCSV}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              CSV
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => exportToExcel(expenses)}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Excel
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => exportToPDF(expenses)}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              PDF
+            </Button>
+          </div>
         </div>
       </div>
 
