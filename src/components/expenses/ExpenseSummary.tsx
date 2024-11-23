@@ -7,6 +7,21 @@ interface ExpenseSummaryProps {
   baseCurrency: string;
 }
 
+// Define category colors
+const categoryColors: Record<string, string> = {
+  Travel: "#3B82F6",
+  Food: "#10B981",
+  Supplies: "#F59E0B",
+  Equipment: "#6366F1",
+  Software: "#EC4899",
+  Subscription: "#8B5CF6",
+  Entertainment: "#F97316",
+  Transportation: "#14B8A6",
+  Accommodation: "#6366F1",
+  "Office Supplies": "#EF4444",
+  Other: "#6B7280"
+};
+
 const ExpenseSummary = ({ expenses, baseCurrency }: ExpenseSummaryProps) => {
   const totalAmount = expenses.reduce((sum, expense) => sum + expense.convertedAmount, 0);
   const workExpenses = expenses.filter(e => e.type === "work");
@@ -23,6 +38,7 @@ const ExpenseSummary = ({ expenses, baseCurrency }: ExpenseSummaryProps) => {
   ).map(([category, amount]) => ({
     category,
     amount,
+    fill: categoryColors[category] || categoryColors.Other
   }));
 
   return (
@@ -62,7 +78,9 @@ const ExpenseSummary = ({ expenses, baseCurrency }: ExpenseSummaryProps) => {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="category" />
               <YAxis />
-              <Tooltip />
+              <Tooltip 
+                formatter={(value: number) => [`${value.toFixed(2)} ${baseCurrency}`, 'Amount']}
+              />
               <Bar dataKey="amount" fill="#3B82F6" />
             </BarChart>
           </ResponsiveContainer>

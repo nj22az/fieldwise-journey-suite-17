@@ -66,7 +66,7 @@ const ExpenseTable = ({ expenses, setExpenses }: ExpenseTableProps) => {
               <TableCell className="capitalize">{expense.type}</TableCell>
               <TableCell>{expense.category}</TableCell>
               <TableCell>{expense.description}</TableCell>
-              <TableCell>${expense.amount.toFixed(2)}</TableCell>
+              <TableCell>{expense.amount.toFixed(2)}</TableCell>
               <TableCell>{expense.paymentMethod}</TableCell>
               <TableCell>
                 {expense.reimbursable ? "Reimbursable" : "Not Reimbursable"}
@@ -77,7 +77,6 @@ const ExpenseTable = ({ expenses, setExpenses }: ExpenseTableProps) => {
                     variant="ghost"
                     size="icon"
                     onClick={() => handleLockToggle(expense.id)}
-                    disabled={expense.isLocked}
                   >
                     {expense.isLocked ? (
                       <Lock className="h-4 w-4" />
