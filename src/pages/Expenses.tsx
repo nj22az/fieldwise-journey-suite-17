@@ -13,6 +13,9 @@ export type Expense = {
   category: string;
   description: string;
   amount: number;
+  currency: string;
+  convertedAmount: number;
+  conversionRate: number;
   paymentMethod: string;
   reimbursable: boolean;
   isLocked: boolean;
@@ -22,6 +25,20 @@ export type Expense = {
 
 const Expenses = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  
+  // Mock conversion rates - in a real app, these would come from an API
+  const conversionRates: Record<string, number> = {
+    USD: 1,
+    EUR: 0.85,
+    GBP: 0.73,
+    JPY: 110.0,
+    AUD: 1.35,
+    CAD: 1.25,
+    CHF: 0.92,
+    CNY: 6.45,
+    SEK: 8.65,
+    NZD: 1.42
+  };
 
   const handleAddExpense = (expense: Omit<Expense, "id" | "createdAt" | "updatedAt" | "isLocked">) => {
     const newExpense: Expense = {
@@ -52,7 +69,11 @@ const Expenses = () => {
         <TabsContent value="all" className="space-y-6">
           <ExpenseSummary expenses={expenses} />
           <Card className="p-6">
-            <ExpenseForm onSubmit={handleAddExpense} />
+            <ExpenseForm 
+              onSubmit={handleAddExpense} 
+              baseCurrency="USD"
+              conversionRates={conversionRates}
+            />
           </Card>
           <ExpenseTable expenses={expenses} setExpenses={setExpenses} />
         </TabsContent>
@@ -60,7 +81,12 @@ const Expenses = () => {
         <TabsContent value="work" className="space-y-6">
           <ExpenseSummary expenses={expenses.filter(e => e.type === "work")} />
           <Card className="p-6">
-            <ExpenseForm onSubmit={handleAddExpense} defaultType="work" />
+            <ExpenseForm 
+              onSubmit={handleAddExpense} 
+              defaultType="work"
+              baseCurrency="USD"
+              conversionRates={conversionRates}
+            />
           </Card>
           <ExpenseTable 
             expenses={expenses.filter(e => e.type === "work")} 
@@ -71,7 +97,12 @@ const Expenses = () => {
         <TabsContent value="private" className="space-y-6">
           <ExpenseSummary expenses={expenses.filter(e => e.type === "private")} />
           <Card className="p-6">
-            <ExpenseForm onSubmit={handleAddExpense} defaultType="private" />
+            <ExpenseForm 
+              onSubmit={handleAddExpense} 
+              defaultType="private"
+              baseCurrency="USD"
+              conversionRates={conversionRates}
+            />
           </Card>
           <ExpenseTable 
             expenses={expenses.filter(e => e.type === "private")} 
