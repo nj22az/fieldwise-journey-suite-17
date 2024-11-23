@@ -1,6 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Download, Upload, PlayCircle } from "lucide-react";
+import { Download, Upload, HelpCircle } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 interface ExpenseHeaderProps {
   baseCurrency: string;
@@ -25,6 +33,13 @@ const ExpenseHeader = ({
   onExportPDF,
   fileInputRef,
 }: ExpenseHeaderProps) => {
+  const showHelp = (topic: string) => {
+    toast.info(topic === 'rates' 
+      ? "Import a CSV file with currency codes and rates to update conversion rates"
+      : "Use the export options to backup your data or share it with others"
+    );
+  };
+
   return (
     <div className="flex justify-between items-center">
       <h1 className="text-3xl font-bold text-slate-900">Expenses</h1>
@@ -59,14 +74,6 @@ const ExpenseHeader = ({
           <Upload className="w-4 h-4 mr-2" />
           Import Rates
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onLoadSample}
-        >
-          <PlayCircle className="w-4 h-4 mr-2" />
-          Load Sample Report
-        </Button>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -93,6 +100,26 @@ const ExpenseHeader = ({
             PDF
           </Button>
         </div>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <HelpCircle className="w-5 h-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem onClick={onLoadSample}>
+              Load Sample Expenses
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => showHelp('rates')}>
+              How to Import Rates
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => showHelp('export')}>
+              About Export Options
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
