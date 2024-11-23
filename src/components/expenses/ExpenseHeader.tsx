@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Download, Upload, HelpCircle } from "lucide-react";
+import { Upload, Download, HelpCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,10 +34,18 @@ const ExpenseHeader = ({
   fileInputRef,
 }: ExpenseHeaderProps) => {
   const showHelp = (topic: string) => {
-    toast.info(topic === 'rates' 
-      ? "Import a CSV file with currency codes and rates to update conversion rates"
-      : "Use the export options to backup your data or share it with others"
-    );
+    if (topic === 'rates') {
+      toast.info(
+        "Import a CSV file with currency rates. Format:\n" +
+        "CURRENCY,RATE\n" +
+        "USD,10.45\n" +
+        "EUR,11.35\n" +
+        "GBP,13.23\n\n" +
+        "Note: Rates are relative to your base currency"
+      );
+    } else {
+      toast.info("Use the export options to backup your data or share it with others");
+    }
   };
 
   return (
@@ -71,7 +79,7 @@ const ExpenseHeader = ({
           size="sm"
           onClick={() => fileInputRef.current?.click()}
         >
-          <Upload className="w-4 h-4 mr-2" />
+          <Download className="w-4 h-4 mr-2" />
           Import Rates
         </Button>
         <div className="flex items-center gap-2">
@@ -80,7 +88,7 @@ const ExpenseHeader = ({
             size="sm"
             onClick={onExportCSV}
           >
-            <Download className="w-4 h-4 mr-2" />
+            <Upload className="w-4 h-4 mr-2" />
             CSV
           </Button>
           <Button
@@ -88,7 +96,7 @@ const ExpenseHeader = ({
             size="sm"
             onClick={onExportExcel}
           >
-            <Download className="w-4 h-4 mr-2" />
+            <Upload className="w-4 h-4 mr-2" />
             Excel
           </Button>
           <Button
@@ -96,7 +104,7 @@ const ExpenseHeader = ({
             size="sm"
             onClick={onExportPDF}
           >
-            <Download className="w-4 h-4 mr-2" />
+            <Upload className="w-4 h-4 mr-2" />
             PDF
           </Button>
         </div>
