@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Download } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -11,7 +14,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { format, isWeekend, isWithinInterval } from "date-fns";
 import type { Expense } from "@/pages/Expenses";
-import { HOLIDAYS } from "@/utils/holidayData";
+import { HOLIDAYS } from "@/utils/holidays";
+import type { UserNote } from "@/utils/holidays/types";
+import { toast } from "sonner";
 
 interface ExpenseCalendarProps {
   expenses: Expense[];
@@ -23,6 +28,7 @@ const ExpenseCalendar = ({ expenses, onDateSelect }: ExpenseCalendarProps) => {
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(currentYear.toString());
   const [month, setMonth] = useState((new Date().getMonth() + 1).toString());
+  const [userNotes, setUserNotes] = useState<UserNote[]>([]);
 
   const years = Array.from(
     { length: 5 },
@@ -34,21 +40,39 @@ const ExpenseCalendar = ({ expenses, onDateSelect }: ExpenseCalendarProps) => {
     "July", "August", "September", "October", "November", "December"
   ];
 
-  // Get expenses for the selected date
   const getExpensesForDate = (date: Date) => {
     return expenses.filter(
       (expense) => format(new Date(expense.date), "yyyy-MM-dd") === format(date, "yyyy-MM-dd")
     );
   };
 
-  // Get holiday information for the selected date
   const getHolidayInfo = (date: Date) => {
     return HOLIDAYS.find(
       holiday => format(holiday.date, "yyyy-MM-dd") === format(date, "yyyy-MM-dd")
     );
   };
 
-  // Create an object to store dates with expenses
+  const getUserNote = (date: Date) => {
+    return userNotes.find(
+      note => note.date === format(date, "yyyy-MM-dd")
+    )?.note || "";
+  };
+
+  const handleNoteChange = (note: string) => {
+    if (!selectedDate) return;
+
+    const dateStr = format(selectedDate, "yyyy-MM-dd");
+    setUserNotes(prev => {
+      const existing = prev.findIndex(n => n.date === dateStr);
+      if (existing >= 0) {
+        const newNotes = [...prev];
+        newNotes[existing] = { date: dateStr, note };
+        return newNotes;
+      }
+      return [...prev, { date: dateStr, note }];
+    });
+  };
+
   const expenseDates = expenses.reduce((acc: Record<string, number>, expense) => {
     const dateStr = format(new Date(expense.date), "yyyy-MM-dd");
     acc[dateStr] = (acc[dateStr] || 0) + 1;
@@ -68,37 +92,67 @@ const ExpenseCalendar = ({ expenses, onDateSelect }: ExpenseCalendarProps) => {
     }
   };
 
+  const exportCalendarData = () => {
+    const calendarData = expenses.map(expense => ({
+      ...expense,
+      holiday: getHolidayInfo(new Date(expense.date))?.name || '',
+      userNote: getUserNote(new Date(expense.date))
+    }));
+
+    const blob = new Blob([JSON.stringify(calendarData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `calendar-expenses-${format(new Date(), 'yyyy-MM-dd')}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success("Calendar data exported successfully");
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
       <Card className="p-4">
-        <div className="flex gap-4 mb-4">
-          <Select value={year} onValueChange={setYear}>
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Year" />
-            </SelectTrigger>
-            <SelectContent>
-              {years.map((y) => (
-                <SelectItem key={y} value={y}>
-                  {y}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select 
-            value={month} 
-            onValueChange={(v) => setMonth(v)}
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex gap-4">
+            <Select value={year} onValueChange={setYear}>
+              <SelectTrigger className="w-[120px]">
+                <SelectValue placeholder="Year" />
+              </SelectTrigger>
+              <SelectContent>
+                {years.map((y) => (
+                  <SelectItem key={y} value={y}>
+                    {y}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select 
+              value={month} 
+              onValueChange={(v) => setMonth(v)}
+            >
+              <SelectTrigger className="w-[120px]">
+                <SelectValue placeholder="Month" />
+              </SelectTrigger>
+              <SelectContent>
+                {months.map((m, i) => (
+                  <SelectItem key={m} value={(i + 1).toString()}>
+                    {m}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportCalendarData}
+            className="ml-auto"
           >
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Month" />
-            </SelectTrigger>
-            <SelectContent>
-              {months.map((m, i) => (
-                <SelectItem key={m} value={(i + 1).toString()}>
-                  {m}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            <Download className="w-4 h-4 mr-2" />
+            Export Calendar
+          </Button>
         </div>
 
         <Calendar
@@ -153,7 +207,7 @@ const ExpenseCalendar = ({ expenses, onDateSelect }: ExpenseCalendarProps) => {
                   {getHolidayInfo(selectedDate)?.name}
                 </h4>
                 <p className="text-sm text-blue-700 mt-1">
-                  Country: {getHolidayInfo(selectedDate)?.country}
+                  Countries: {getHolidayInfo(selectedDate)?.countries.join(", ")}
                 </p>
                 <p className="text-sm text-blue-600 mt-2">
                   {getHolidayInfo(selectedDate)?.description}
@@ -161,6 +215,16 @@ const ExpenseCalendar = ({ expenses, onDateSelect }: ExpenseCalendarProps) => {
               </div>
             )}
             
+            <div className="mt-4">
+              <h4 className="font-medium mb-2">Your Notes:</h4>
+              <Textarea
+                value={getUserNote(selectedDate)}
+                onChange={(e) => handleNoteChange(e.target.value)}
+                placeholder="Add your notes for this date..."
+                className="min-h-[100px]"
+              />
+            </div>
+
             <div className="mt-4">
               <h4 className="font-medium mb-2">
                 Expenses for {format(selectedDate, "PP")}:
