@@ -5,6 +5,7 @@ import ExpenseForm from "@/components/expenses/ExpenseForm";
 import ExpenseTable from "@/components/expenses/ExpenseTable";
 import ExpenseSummary from "@/components/expenses/ExpenseSummary";
 import ExpenseHeader from "@/components/expenses/ExpenseHeader";
+import ExpenseCalendar from "@/components/expenses/ExpenseCalendar";
 import { toast } from "sonner";
 import { parseConversionRatesCSV, exportToCSV, exportToExcel, exportToPDF } from "@/utils/csvUtils";
 import { sampleExpenseReports } from "@/utils/sampleExpenseReports";
@@ -113,6 +114,11 @@ const Expenses = () => {
     toast.success(`Loaded sample report: ${report.name}`);
   };
 
+  const handleDateSelect = (date: Date) => {
+    console.log("Selected date:", date);
+    // You can add additional functionality here, like filtering expenses
+  };
+
   return (
     <div className="space-y-6">
       <ExpenseHeader
@@ -132,6 +138,7 @@ const Expenses = () => {
           <TabsTrigger value="all">All Expenses</TabsTrigger>
           <TabsTrigger value="work">Work</TabsTrigger>
           <TabsTrigger value="private">Private</TabsTrigger>
+          <TabsTrigger value="calendar">Calendar</TabsTrigger>
         </TabsList>
         
         <TabsContent value="all" className="space-y-6">
@@ -184,6 +191,13 @@ const Expenses = () => {
             expenses={expenses.filter(e => e.type === "private")} 
             setExpenses={setExpenses}
             onEdit={handleEditExpense}
+          />
+        </TabsContent>
+
+        <TabsContent value="calendar" className="space-y-6">
+          <ExpenseCalendar 
+            expenses={expenses}
+            onDateSelect={handleDateSelect}
           />
         </TabsContent>
       </Tabs>
