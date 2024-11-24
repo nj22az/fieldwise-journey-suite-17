@@ -41,3 +41,22 @@
 .card-hover {
   @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-1;
 }
+
+.rdp {
+  --rdp-cell-size: 40px;
+  --rdp-accent-color: theme('colors.primary.DEFAULT');
+  --rdp-background-color: theme('colors.primary.DEFAULT');
+  --rdp-accent-color-dark: theme('colors.primary.DEFAULT');
+  --rdp-background-color-dark: theme('colors.primary.DEFAULT');
+  --rdp-outline: 2px solid var(--rdp-accent-color);
+  --rdp-outline-selected: 2px solid var(--rdp-accent-color);
+  margin: 1em;
+}
+
+.rdp-day_selected, 
+.rdp-day_selected:focus-visible, 
+.rdp-day_selected:hover {
+  color: var(--rdp-accent-color) !important;
+  opacity: 1 !important;
+  background-color: transparent !important;
+}
